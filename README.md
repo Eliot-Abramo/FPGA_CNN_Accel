@@ -108,28 +108,6 @@ post: for(int f=0; f<4; ++f) {
 
 *Fusing post‑ops here saves \~2 µs per frame and avoids extra BRAM.*
 
-### 4  Host‑Side DMA Burst Setup (cnn\_run.py)
-
-```python
-from pynq import Overlay, allocate
-ol = Overlay('conv_accel.bit')
-input_buf  = allocate(shape=(H,W,IC), dtype=np.int16, cacheable=1)
-output_buf = allocate(shape=(H-2,W-2,OC), dtype=np.int16, cacheable=1)
-conv_ip = ol.conv2d_hw_0
-conv_ip.write(0x10, input_buf.physical_address)
-conv_ip.write(0x18, output_buf.physical_address)
-conv_ip.write(0x1C, coeffs_buf.physical_address)
-conv_ip.write(0x20, bias_buf.physical_address)
-conv_ip.write(0x28, IC)
-conv_ip.write(0x2C, OC)
-conv_ip.write(0x30, H)
-conv_ip.write(0x34, W)
-conv_ip.write(0x00, 1)  # start
-conv_ip.wait()
-```
-
-*PYNQ’s zero‑copy `allocate` ensures physical contiguity for 256‑beat bursts.*
-
 ---
 
 ## 📊 Benchmark & Resource Table
